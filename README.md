@@ -1,7 +1,7 @@
 # ALM4Res
-Keyword-driven Retrieval-Augmented Large Language Models for Cold-start User Recommendations 
+## Keyword-driven Retrieval-Augmented Large Language Models for Cold-start User Recommendations 
 <p align="center">
-<img src="./imgs/pipeline2.pdf" alt="ALM4Res" />
+<img src="./imgs/pipeline.png" alt="ALM4Res" />
 </p>
 Recent advancements in Large Language Models (LLMs) have shown
 great potential in enhancing recommender systems. However, the
@@ -23,4 +23,44 @@ dataset comprising reviews and ratings from seven cities globally,
 indicates that our proposed system offers considerable improve-
 ments in recommendation quality. Notably, integrating in-context
 instructions with LLMs as rankers significantly boosts the recom-
-mender system’s performance
+mender system’s performance.
+
+##  Run Example
+```
+python main.py --genType KNN --genCandidateType KwUser
+```
+
+### baselineModel: jaccard, heuristic, MFbase, MFfeature.
+```
+# jaccard
+python main.py --baselineModel jaccard
+
+#MFbase
+python main.py --baselineModel MFBPR --edgeType IUF --genType KNN 
+
+#MFfeature
+python main.py --baselineModel featureColab --edgeType IUF --genType KNN 
+
+#MPNN
+python main.py --genType KNN --genCandidateType KwUser --edgeType IUF
+
+
+```
+## Args
+
+> `checkKeyword`: check number of keywords then exit
+>
+> `baselineModel`: models.
+>
+> `genType`: build a KNN model to obtain most similar keyword in case of missing for testing user.
+>
+> `genCandidateType`: file similar User or not?
+>
+
+## Results for retrieval models:
+| Models      | P@20        | R@20          |
+| :----:      |    :----:   |    :----:     |
+| jaccard     | 0.03        |   0.06        |
+| MFMPR		  | 0.05        |   0.13        |
+| MFfeature	  | 0.08        |   0.28        |
+| MPNN 		  | 0.15        |   0.42        |
