@@ -25,12 +25,23 @@ ments in recommendation quality. Notably, integrating in-context
 instructions with LLMs as rankers significantly boosts the recom-
 mender system’s performance.
 
-##  Run Example
+## Dependencies
 ```
+TBD
+```
+##  Usage
+
+### Stage 1: Keyword extraction and Processing
+```
+# extract keyword
 python main.py --genType KNN --genCandidateType KwUser
 ```
 
-### baselineModel: jaccard, heuristic, MFbase, MFfeature.
+### Stage 2: Generate candidates: jaccard, MPG, BCR, MF, MVAE.
+```
+cd ..
+```
+
 ```
 # jaccard
 python main.py --baselineModel jaccard
@@ -46,7 +57,7 @@ python main.py --genType KNN --genCandidateType KwUser --edgeType IUF
 
 
 ```
-## Args
+#### Args
 
 > `checkKeyword`: check number of keywords then exit
 >
@@ -57,10 +68,18 @@ python main.py --genType KNN --genCandidateType KwUser --edgeType IUF
 > `genCandidateType`: file similar User or not?
 >
 
-## Results for retrieval models:
+#### Results for retrieval models:
 | Models      | P@20        | R@20          |
 | :----:      |    :----:   |    :----:     |
 | jaccard     | 0.03        |   0.06        |
-| MFMPR		  | 0.05        |   0.13        |
-| MFfeature	  | 0.08        |   0.28        |
-| MPNN 		  | 0.15        |   0.42        |
+| MFBPR		  | 0.05        |   0.13        |
+| MVAE	  | 0.08        |   0.28        |
+| MVAE 		  | 0.15        |   0.42        |
+| MPG 		  | 0.15        |   0.42        |
+
+### Stage 3: Recommend by LLMs
+
+## Dataset:
+```
+TBD
+```

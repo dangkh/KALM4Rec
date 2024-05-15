@@ -1,2 +1,6 @@
 
 .DS_Store
+*.pyc
+*.html
+/data
+/ipynb_checkpoints
