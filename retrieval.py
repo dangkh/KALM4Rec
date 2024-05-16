@@ -66,7 +66,7 @@ sourceFile = open(args.logResult, 'a')
 
 
 print('*'*10, 'Result' ,'*'*10, file = sourceFile)
-dictionary = {}
+prediction = []
 
 if args.RetModel == "CBR":
     print("*"*50)
@@ -132,14 +132,67 @@ if args.RetModel == "CBR":
             if mean(r) > mean(mr):
                 mp, mr, mf = p, r, f
             print(f'Epoch [{epoch+1}/{num_epochs}], prec: {mean(p)}, rec: {mean(r)}, f1: {mean(f)}')
-            
+elif args.RetModel == "graph1":
+    pass
+else:
+    print("*"*50)
+    print("using MPG")
+    print("*"*50)
+    l_rest = restGraph.listRestCode
+    kw_data = KNN.kw_data
+    lu, li, lh = list([]), list([]), list([])
+    for rest in tqdm(keywordScore):
+        kw_scs = keywordScore[rest]
+        u = l_rest.index(rest)
+        tmpI, tmpH = [], []
+        for kw, sc in kw_scs:
+            tmpI.append(kw_data.index(kw))
+            tmpH.append(sc)
+        tmpU = [u] * len(tmpI)
+        lu.extend(tmpU)
+        li.extend(tmpI)
+        lh.extend(tmpH)
+
+    adj = np.zeros([len(l_rest), len(kw_data)])
+    for ii in range(len(lu)):
+        u, v, w = lu[ii], li[ii], lh[ii]
+        if self.edgeType == "IUF":
+            adj[u, v] = w
+        else:
+            adj[u, v] = 1
+
+    lResults = []
+    listsimU = []
+    lidx = [x for x in range(len(test_users))]
+    np.random.shuffle(lidx)
+    for ite in tqdm(range(len(test_users))):
+        idx = lidx[ite]
+        testUser = test_users[idx]
+        testkey = test_users2kw[idx]
+        testkey = KNN.get_topK_Key(testkey)
+        topK_Key, keyfrequency = restGraph.retrievalKey(testkey)
+        testkey = [kw_data.index(x) for x in topK_Key]
+        ft = np.zeros(len(kw_data))
+        for x in testkey: ft[x] = 1.0
+        ft = ft.reshape(-1, 1)
+        tmp = np.matmul(adj, ft).reshape(-1)
+        idxrest = np.argsort(tmp)[::-1]
+        result = [l_rest[x] for x in idxrest[:args.quantity]]
+        prediction.append(result)
+        groundtruth = gt[testUser]
+        score = quick_eval(result, groundtruth)
+        lResults.append(score)
+
+    mp, mr, mf = extractResult(lResults)
+
 
 if args.export2LLMs:
-    pred = evaluateModel(model, test_loader, rest_feature, gt, test_users, args.quantity, rest_Label, True)
-    json_object = json.dumps(pred, indent=4)
+    if args.RetModel == "CBR":
+        prediction = evaluateModel(model, test_loader, rest_feature, gt, test_users, args.quantity, rest_Label, True)
+    json_object = json.dumps(prediction, indent=4)
     with open(f"{args.city}_pred_CBR.json", "w") as outfile:
         outfile.write(json_object)
-    
+
 p, r, f = mp, mr, mf 
 print("args:", args, file = sourceFile)
 print(mean(p), mean(r), mean(f), file = sourceFile)
