@@ -1,4 +1,4 @@
-# KALM4Res
+# KALM4Rec
 ## Keyword-driven Retrieval-Augmented Large Language Models for Cold-start User Recommendations 
 <p align="center">
 <img src="./imgs/pipeline.png" alt="ALM4Res" />
@@ -34,26 +34,26 @@ TBD
 ### Stage 1: Keyword extraction and Processing
 ```
 # extract keyword
-python main.py --genType KNN --genCandidateType KwUser
+TBD
 ```
 
 ### Stage 2: Generate candidates: jaccard, MPG, BCR, MF, MVAE.
-```
-cd ..
-```
 
 ```
 # jaccard
-python main.py --baselineModel jaccard
+python cmain.py --RetModel jaccard
 
-#MFbase
-python main.py --baselineModel MFBPR --edgeType IUF --genType KNN 
+# MF
+python cmain.py --RetModel MF --edgeType IUF --genType KNN 
 
-#MFfeature
-python main.py --baselineModel featureColab --edgeType IUF --genType KNN 
+# MVAE
+python cmain.py --RetModel MVAE --edgeType IUF --genType KNN 
 
-#MPNN
-python main.py --genType KNN --genCandidateType KwUser --edgeType IUF
+# CBR
+python retrieval.py --RetModel CBR --edgeType IUF --genType KNN 
+
+# MPG
+python retrieval.py --genType KNN  --edgeType IUF
 
 
 ```
@@ -61,21 +61,20 @@ python main.py --genType KNN --genCandidateType KwUser --edgeType IUF
 
 > `checkKeyword`: check number of keywords then exit
 >
-> `baselineModel`: models.
+> `RetModel`: models.
 >
 > `genType`: build a KNN model to obtain most similar keyword in case of missing for testing user.
 >
-> `genCandidateType`: file similar User or not?
 >
 
 #### Results for retrieval models:
 | Models      | P@20        | R@20          |
 | :----:      |    :----:   |    :----:     |
 | jaccard     | 0.03        |   0.06        |
-| MFBPR		  | 0.05        |   0.13        |
-| MVAE	  | 0.08        |   0.28        |
-| MVAE 		  | 0.15        |   0.42        |
-| MPG 		  | 0.15        |   0.42        |
+| MF          | 0.05        |   0.13        |
+| MVAE        | 0.08        |   0.28        |
+| CBR         | 0.15        |   0.42        |
+| MPG         | 0.15        |   0.42        |
 
 ### Stage 3: Recommend by LLMs
 
