@@ -135,12 +135,32 @@ if args.RetModel == "CBR":
             
 
 if args.export2LLMs:
-    json_object = json.dumps(dictionary, indent=4)
-    with open(f"{args.city}_knn2rest_CBR.json", "w") as outfile:
+    pred = evaluateModel(model, test_loader, rest_feature, gt, test_users, args.quantity, rest_Label, True)
+    json_object = json.dumps(pred, indent=4)
+    with open(f"{args.city}_pred_CBR.json", "w") as outfile:
         outfile.write(json_object)
+    
 p, r, f = mp, mr, mf 
 print("args:", args, file = sourceFile)
 print(mean(p), mean(r), mean(f), file = sourceFile)
 print('*'*10, 'End' ,'*'*10, file = sourceFile)
 sourceFile.close()
 print("End time: ", time.strftime('%Y-%m-%d %H:%M:%S',time.localtime(time.time())))
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

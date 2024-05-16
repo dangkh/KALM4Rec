@@ -63,8 +63,8 @@ def evaluate2pred(users, groundtruth, listPred, numRetrieval, rest_Label):
         pred = listPred[idx]
         tmp = np.argsort(pred)[::-1][:numRetrieval]
         restPred = [rest_Label[x] for x in tmp]
-        score = quick_eval(restPred, groundtruthUser)
-        lResults.append(restPred)    
+        # score = quick_eval(restPred, groundtruthUser)
+        lResults.append(restPred)
     return lResults
 
 def evaluate(users, groundtruth, listPred, numRetrieval, rest_Label):
