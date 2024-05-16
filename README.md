@@ -1,4 +1,4 @@
-# ALM4Res
+# KALM4Res
 ## Keyword-driven Retrieval-Augmented Large Language Models for Cold-start User Recommendations 
 <p align="center">
 <img src="./imgs/pipeline.png" alt="ALM4Res" />
