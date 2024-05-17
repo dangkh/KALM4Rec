@@ -3,6 +3,8 @@ import torch.nn as nn
 from torch.nn.init import xavier_normal_, constant_, xavier_uniform_
 import torch.optim as optim
 import torch
+import json
+import numpy as np
 
 
 class MatrixFactorization(nn.Module):
@@ -61,6 +63,44 @@ class AttentionPooling(nn.Module):
 
         return pooled_features, weights
 
+class MFBPR(nn.Module):
+    def __init__(self, user_num, item_num, factor_num):
+        super(MFBPR, self).__init__()
+        """
+        user_num: number of users;
+        item_num: number of items;
+        factor_num: number of predictive factors.
+        """     
+        self.embed_user = nn.Embedding(user_num, factor_num)
+        self.embed_item = nn.Embedding(item_num, factor_num)
+
+        nn.init.normal_(self.embed_user.weight, std=0.01)
+        nn.init.normal_(self.embed_item.weight, std=0.01)
+
+    def forward(self, user, item_i, item_j):
+        user = self.embed_user(user)
+        item_i = self.embed_item(item_i)
+        item_j = self.embed_item(item_j)
+
+        prediction_i = (user * item_i).sum(dim=-1)
+        prediction_j = (user * item_j).sum(dim=-1)
+        return prediction_i, prediction_j            
+
+
+    def prediction(self, user, item):
+        user = self.embed_user(user)
+        item_i = self.embed_item(item)
+        return (user * item_i).sum(dim=-1)
+
+    def csPrediction(self, top3Users, item):
+        tmpU = []
+        for uid in top3Users:
+            sc = self.prediction(uid, item[0])
+            tmpU.append(sc.item())
+        result = np.mean(np.asarray(tmpU))
+        return result
+
+
 def xavier_normal_initialization(module):
     r""" using `xavier_normal_`_ in PyTorch to initialize the parameters in
     nn.Embedding and nn.Linear layers. For bias in nn.Linear layers,
@@ -73,4 +113,39 @@ def xavier_normal_initialization(module):
     if isinstance(module, nn.Linear):
         xavier_normal_(module.weight.data)
         if module.bias is not None:
-            constant_(module.bias.data, 0)          
+            constant_(module.bias.data, 0)
+
+
+class JaccardSim(object):
+    """docstring for JaccardSim"""
+    def __init__(self, path, quantity):
+        super(JaccardSim, self).__init__()
+        self.path = path
+        self.quantity = quantity
+        f = open(path)
+        keywordScore = json.load(f)
+        self.rest_kw = {}
+        self.l_rest = []
+        for rest in keywordScore:
+            self.rest_kw[rest] = []
+            lw = keywordScore[rest]
+            self.l_rest.append(rest)
+            for kw, sc in lw:
+                self.rest_kw[rest].append(kw)
+        # read TFIUF contain rest: kw
+
+        
+    def pred(self, userkwList):
+        sc = []
+        for rest in self.rest_kw:
+            sc.append(self.jscore(self.rest_kw[rest], userkwList))
+        idxrest = np.argsort(sc)[::-1]
+        result = [self.l_rest[x] for x in idxrest[:self.quantity]]
+        return result
+
+    def jscore(self, l1, l2):
+        l1 = set(l1)
+        l2 = set(l2)
+        i = l1.intersection(l2)
+        u = l1.union(l2)
+        return len(i) / len(u)

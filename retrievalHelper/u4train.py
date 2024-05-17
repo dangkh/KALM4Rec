@@ -39,6 +39,68 @@ class DataCF(Dataset):
     def __len__(self):
         return len(self.data)
 
+
+class DataBPR(Dataset):
+    '''
+    this dataset is for BPR with only embedding
+    '''
+    def __init__(self, label, testSet = False):
+        self.label = torch.from_numpy(label)
+        self.numI, self.numU = self.label.shape[1], self.label.shape[0]
+        self.testSet = testSet
+        # prepare for each user
+        self.listU = []
+        self.listR = []
+        self.listNegative = []
+        self.testSet = testSet
+        if testSet:
+            rs = [x for x in range(self.numI)]
+            for userIDX in range(self.numU):
+                userLB = label[userIDX]
+                tmp = [userIDX] * len(userLB)
+                self.listU.extend(tmp)
+                self.listR.extend(rs)
+        else:
+            for userIDX in range(self.numU):
+                userLB = label[userIDX]
+                pos = np.where(userLB == 1)[0]
+
+                tmp = [userIDX] * len(pos)
+                self.listU.extend(tmp)
+                self.listR.extend(pos)
+                '''
+                sample negative
+                '''
+                posN = np.where(userLB == 0)[0]
+                np.random.shuffle(posN)
+                numN = 0
+                counter = 0
+                tmp = []
+                while numN < len(pos):
+                    tmp.append(posN[counter])
+                    numN += 1
+                    counter += 1
+                    counter = counter % len(posN)
+                self.listNegative.extend(tmp)
+            
+            assert len(self.listNegative) == len(self.listU)
+
+        assert len(self.listR) == len(self.listU)
+
+    def __getitem__(self, index):
+        '''
+        return data and label
+        '''
+        if self.testSet:
+            uidx, iidx = self.listU[index], self.listR[index]
+            return   uidx,  iidx
+        uidx, iidx, nidx = self.listU[index], self.listR[index], self.listNegative[index]
+        # iidx = self.mapLB_Dat[iidx]
+        return uidx, iidx, nidx
+
+    def __len__(self):
+        return len(self.listU)
+
 def evaluateModel(model, data_loader, rest_train, groundtruth, users, numRetrieval, rest_Label, getPred = False):
     model.eval()
     listPred = []
@@ -80,3 +142,20 @@ def evaluate(users, groundtruth, listPred, numRetrieval, rest_Label):
         score = quick_eval(restPred, groundtruthUser)
         lResults.append(score)    
     return lResults    
+
+
+def evaluateModel_MFBPR(model, data_loader, rest_train, groundtruth, users, numRetrieval, rest_Label):
+    lResults = []
+    model.eval()
+    listPred = []
+    for batch_idx, (userID, restID) in enumerate(data_loader):
+        userID = userID.to(device)
+        restID = restID.to(device)
+        predictions = model.prediction(userID, restID)
+        predictions = predictions.detach().cpu().numpy()
+        r = [x for x in predictions]
+        listPred.extend(r)
+    listPred = np.asarray(listPred).reshape(len(users),-1)
+    return evaluate(users, groundtruth, listPred, numRetrieval, rest_Label)
+
+

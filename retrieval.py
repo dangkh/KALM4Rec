@@ -31,7 +31,7 @@ parser.add_argument('--export2LLMs', action='store_true', help='whether export l
 '''
 Model args
 '''
-parser.add_argument('--RetModel', type=str, default='MPG_old', help='jaccard, MF, MVAE, CBR, MPG_old, MPG')
+parser.add_argument('--RetModel', type=str, default='MPG_old', help='Jaccard, MF, MVAE, CBR, MPG_old, MPG')
 parser.add_argument('--numKW4FT', type=int, default=20, help='number of keyword for feature')
 
 '''
@@ -132,7 +132,97 @@ if args.RetModel == "CBR":
             if mean(r) > mean(mr):
                 mp, mr, mf = p, r, f
             print(f'Epoch [{epoch+1}/{num_epochs}], prec: {mean(p)}, rec: {mean(r)}, f1: {mean(f)}')
-elif args.RetModel == "graph1":
+elif args.RetModel == "Jaccard":
+    print("*"*50)
+    print("using Jaccard")
+    print("*"*50)
+    jcsim = JaccardSim(f'./data/score/{args.city}-keywords-TFIUF.json', args.quantity)
+    lResults = []
+    for idx in tqdm(range(len(test_users))):
+        testUser = test_users[idx]
+        testkey = test_users2kw[idx]
+        pred = jcsim.pred(testkey)
+        groundtruth = gt[testUser]
+        prediction.append(pred)
+        score = quick_eval(pred, groundtruth, sourceFile)
+        lResults.append(score)
+    mp, mr, mf = extractResult(lResults)
+elif args.RetModel == "MVAE":
+    pass
+elif args.RetModel == "MF":
+    print("*"*50)
+    print("running MF-BPR at: ")
+    print("*"*50)
+
+    numUser = len(train_users)
+    numItem = len(rest_Label)
+
+    label_train, label_test = label_ftColab(train_users, test_users, gt, restGraph.numRest, rest_Label)
+
+    learning_rate = args.lr
+    embedding_dim = args.hidden_dim
+    num_epochs = args.num_epochs
+
+    trainLB = np.asarray(label_train)
+    testLB = np.asarray(label_test)
+    train_dataset = DataBPR(trainLB)
+    test_dataset = DataBPR(trainLB, True)
+    train_loader = DataLoader(train_dataset, batch_size=128, shuffle=True)
+    test_loader = DataLoader(test_dataset, batch_size=128, shuffle=False)
+
+    model = MFBPR(numUser, numItem, embedding_dim).to(device)
+
+    mp, mr, mf = 0, 0, 0
+    print(model)
+    optimizer = optim.AdamW(model.parameters(), lr=learning_rate, weight_decay= 1e-4)
+    # Training loop
+    for epoch in range(num_epochs):
+        total_loss = 0.0
+        model.train()
+        for batch_idx, batchDat in enumerate(train_loader):
+            uid, pid, nid = batchDat
+            uid = uid.to(device)
+            pid = pid.to(device)
+            nid = nid.to(device)
+
+            optimizer.zero_grad()
+            pred_i, pred_j = model(uid, pid, nid)
+            loss = - ((pred_i - pred_j).sigmoid()+1e-10).log().sum()
+            loss.backward()
+            total_loss += loss.item() 
+            optimizer.step()
+
+            # Print training progress
+        print(f'Epoch [{epoch+1}/{num_epochs}], Loss: {total_loss}')
+
+        if (epoch+1) % 10 == 0:
+            
+            lResults = evaluateModel_MFBPR(model, test_loader, "", gt, train_users, args.quantity, rest_Label)
+            p, r, f = extractResult(lResults)
+            if mean(r) > mean(mr):
+                mp, mr, mf = p, r, f
+            print(f'Epoch [{epoch+1}/{num_epochs}], prec: {mean(p)}, rec: {mean(r)}, f1: {mean(f)}')
+    
+    lResults = []
+    for idx in tqdm(range(len(test_users))):
+        if idx > 3000:
+            break
+        testUser, topK_Key, topUser = procesTest(test_users, test_users2kw, idx, KNN, restGraph, True)
+        idU = torch.LongTensor([train_users.index(x) for x in topUser]).to(device)
+        rest_score = []
+        for rest in range(restGraph.numRest):
+            restID = torch.LongTensor([rest]).to(device)
+            rest_score.append(model.csPrediction(idU,restID))
+        
+        tmp = np.argsort(rest_score)[::-1][:args.quantity]
+        restPred = [rest_Label[x] for x in tmp]
+
+        groundtruth = gt[testUser]
+        score = quick_eval(restPred, groundtruth)
+        lResults.append(score)
+    mp, mr, mf = extractResult(lResults)
+
+elif args.RetModel == "MPG_old":
     pass
 else:
     print("*"*50)
@@ -156,21 +246,17 @@ else:
     adj = np.zeros([len(l_rest), len(kw_data)])
     for ii in range(len(lu)):
         u, v, w = lu[ii], li[ii], lh[ii]
-        if self.edgeType == "IUF":
+        if args.edgeType == "IUF":
             adj[u, v] = w
         else:
             adj[u, v] = 1
 
     lResults = []
-    listsimU = []
     lidx = [x for x in range(len(test_users))]
     np.random.shuffle(lidx)
     for ite in tqdm(range(len(test_users))):
         idx = lidx[ite]
-        testUser = test_users[idx]
-        testkey = test_users2kw[idx]
-        testkey = KNN.get_topK_Key(testkey)
-        topK_Key, keyfrequency = restGraph.retrievalKey(testkey)
+        testUser, topK_Key = procesTest(test_users, test_users2kw, idx, KNN, restGraph)
         testkey = [kw_data.index(x) for x in topK_Key]
         ft = np.zeros(len(kw_data))
         for x in testkey: ft[x] = 1.0
@@ -182,7 +268,6 @@ else:
         groundtruth = gt[testUser]
         score = quick_eval(result, groundtruth)
         lResults.append(score)
-
     mp, mr, mf = extractResult(lResults)
 
 
