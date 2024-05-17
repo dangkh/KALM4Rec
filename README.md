@@ -44,16 +44,16 @@ TBD
 python cmain.py --RetModel jaccard
 
 # MF
-python cmain.py --RetModel MF --edgeType IUF --genType KNN 
+python .\retrieval.py --RetModel MF  --export2LLMs --city edinburgh --num_epochs 100 --hidden_dim 256 --lr 0.007
 
 # MVAE
-python cmain.py --RetModel MVAE --edgeType IUF --genType KNN 
+python .\retrieval.py --RetModel MVAE  --export2LLMs --city edinburgh --num_epochs 500 --hidden_dim 128 --lr 0.003
 
 # CBR
 python retrieval.py --RetModel CBR --edgeType IUF --genType KNN 
 
 # MPG
-python retrieval.py --genType KNN  --edgeType IUF
+python retrieval.py --RetModel MGP --edgeType IUF --genType KNN  
 
 
 ```

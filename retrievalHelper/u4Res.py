@@ -146,7 +146,7 @@ class retaurantReviewG(object):
         if kw_score is None:
             kw_score = np.ones(len(keylist))
         score = np.asarray(kw_score)
-        fullScore = [0]*len(self.l_rest)
+        fullScore = [0]*len(self.listRestCode)
         counter = 0
         for key in keylist:
             '''
@@ -157,18 +157,18 @@ class retaurantReviewG(object):
             listRest = self.rests[key]
             for rest in listRest:
                 value = score[counter]*listRest[rest]
-                restid = self.l_rest.index(rest)
+                restid = self.listRestCode.index(rest)
                 fullScore[restid] += value
             counter += 1
         # idxrest = np.argsort(np.asarray(fullScore))
         idxrest = np.argsort(fullScore)[::-1]
-        result = [self.l_rest[x] for x in idxrest[:quantity]]
+        result = [self.listRestCode[x] for x in idxrest[:quantity]]
         return result
 
     def key_score2simUser(self, keylist, keyfrequency, numReturn = 3):
         score = np.asarray(keyfrequency)
-        fullScore = [0]*len(self.l_user)
-        restScore = [0]*len(self.l_rest)
+        fullScore = [0]*len(self.listUserCode)
+        restScore = [0]*len(self.listRestCode)
         counter = 0
         for key in keylist:  
             if key not in self.users:
@@ -177,14 +177,14 @@ class retaurantReviewG(object):
             listUser = self.users[key]
             for user in listUser:
                 value = score[counter]*(listUser[user])
-                userid = self.l_user.index(user)
+                userid = self.listUserCode.index(user)
                 fullScore[userid] += value
             counter += 1
         '''
         --> top numReturn similar users 
         '''
         idxuser = np.argsort(fullScore)[::-1]
-        result = [self.l_user[x] for x in idxuser[:numReturn]]
+        result = [self.listUserCode[x] for x in idxuser[:numReturn]]
         '''
         --> top numReturn similar users 
         '''

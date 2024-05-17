@@ -132,6 +132,17 @@ def extractResult(lResults):
     return p, r, f
 
 
+def procesTest(test_users, test_users2kw, idx, KNN, restGraph, returnTop = False):
+    testUser = test_users[idx]
+    testkey = test_users2kw[idx]
+    testkey = KNN.get_topK_Key(testkey)
+
+    topK_Key, keyfrequency = restGraph.retrievalKey(testkey)
+    if returnTop:
+        topUser = restGraph.key_score2simUser(topK_Key, keyfrequency)
+        return testUser, topK_Key, topUser
+
+    return testUser, topK_Key    
 
 
 
