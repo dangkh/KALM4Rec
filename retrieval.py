@@ -31,7 +31,7 @@ parser.add_argument('--export2LLMs', action='store_true', help='whether export l
 '''
 Model args
 '''
-parser.add_argument('--RetModel', type=str, default='MPG_old', help='Jaccard, MF, MVAE, CBR, MPG_old, MPG')
+parser.add_argument('--RetModel', type=str, default='MPG', help='Jaccard, MF, MVAE, CBR, MPG_old, MPG')
 parser.add_argument('--numKW4FT', type=int, default=20, help='number of keyword for feature')
 
 '''
@@ -223,6 +223,7 @@ elif args.RetModel == "MF":
     mp, mr, mf = extractResult(lResults)
 
 elif args.RetModel == "MPG_old":
+    # please visit our old project
     pass
 else:
     print("*"*50)
