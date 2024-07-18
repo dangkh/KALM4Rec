@@ -3,38 +3,25 @@
 <p align="center">
 <img src="./imgs/pipeline.png" alt="ALM4Res" />
 </p>
-Recent advancements in Large Language Models (LLMs) have shown
-great potential in enhancing recommender systems. However, the
-challenge of accurately recommending restaurants to cold-start
-users, who have no historical data, remains a considerable hurdle.
-In this paper, we propose a method to address the practical scenario
-of cold-start user restaurant recommendation, that requires only a
-few input keywords from the users. We investigate the efficacy of
-combining retrieval models with LLMs which function as rankers
-in recommendation. The process involves an initial stage where
-keyword-driven retrieval models are used to obtain restaurant can-
-didates. This step mitigates the limitations of LLMs in processing
-extensive tokens and reducing the risk of generating misleading in-
-formation. Subsequently, we employ various prompting strategies
-with LLMs including zero-shot and few-shot, and explore in-context
-instruction learning by integrating multiple examples directly into
-the LLM prompts. Our evaluation, conducted on a Yelp restaurant
-dataset comprising reviews and ratings from seven cities globally,
-indicates that our proposed system offers considerable improve-
-ments in recommendation quality. Notably, integrating in-context
-instructions with LLMs as rankers significantly boosts the recom-
-mender system’s performance.
 
 ## Dependencies
 ```
-TBD
+spacy, DGL, 
 ```
 ##  Usage
 
 ### Stage 1: Keyword extraction and Processing
 ```
 # extract keyword
-TBD
+python extractor.py
+
+# Download train: train is filtered file at ./data/preprocessed/by_city-users_min_3_reviews/keywords_spacy-min_3/train) then rename as: {city}-keyword_train.json
+# Download test: train is filtered file at ./data/preprocessed/by_city-users_min_3_reviews/keywords_spacy/test) then rename as: {city}-keyword_test.json
+# move those train/test keywords file to ./data/keywords directory
+
+# Download irf and tf_irf;  rename as {city}-keyword-IRF.json {city}-keyword-TFIRF.json ; move to  ./data/score/{city}-keyword-TFIRF.json
+# Download iuf and tf_iuf;  rename as {city}-keyword-IUF.json {city}-keyword-TFIUF.json ; move to  ./data/score/{city}-keyword-TFIUF.json
+# put file ./data/preprocessed/{city}_kwSenEB_pad_{tp}.npy to ./data/embedding/{city}_kwSenEB_pad_{tp}.npy
 ```
 
 ### Stage 2: Generate candidates: jaccard, MPG, BCR, MF, MVAE.
@@ -50,10 +37,10 @@ python .\retrieval.py --RetModel MF  --export2LLMs --city edinburgh --num_epochs
 python .\retrieval.py --RetModel MVAE  --export2LLMs --city edinburgh --num_epochs 500 --hidden_dim 128 --lr 0.003
 
 # CBR
-python retrieval.py --RetModel CBR --edgeType IUF --genType KNN 
+python retrieval.py --RetModel CBR --edgeType IUF 
 
 # MPG
-python retrieval.py --RetModel MGP --edgeType IUF --genType KNN  
+python retrieval.py --RetModel MGP --edgeType IUF 
 
 
 ```
@@ -80,5 +67,6 @@ python retrieval.py --RetModel MGP --edgeType IUF --genType KNN
 
 ## Dataset:
 ```
-TBD
+Yelp, Tripadvisor
+Link: TBD
 ```
