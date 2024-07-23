@@ -336,6 +336,9 @@ model = SentenceTransformer('all-MiniLM-L6-v2')
 
 typeFile = ['train', 'test']
 city = args.city
+mkdir("./data/keywords/")
+mkdir("./data/score/")
+mkdir("./data/embedding/")
 for tp in typeFile:
     continue
     if tp == 'train':
@@ -358,7 +361,6 @@ for tp in typeFile:
 
 # Download irf and tf_irf;  rename as {city}-keyword-IRF.json {city}-keyword-TFIRF.json ; move to  ./data/score/{city}-keyword-TFIRF.json
 # Download iuf and tf_iuf;  rename as {city}-keyword-IUF.json {city}-keyword-TFIUF.json ; move to  ./data/score/{city}-keyword-TFIUF.json
-
 shutil.move(f"./data/preprocessed/by_city-users_min_3_reviews/keywords_spacy-min_3/train/{city}-keywords.json",
     f"./data/keywords/{city}-keywords_train.json")
 shutil.move(f"./data/preprocessed/by_city-users_min_3_reviews/keywords_spacy/test/{city}-keywords.json",
