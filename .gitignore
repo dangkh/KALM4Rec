@@ -4,5 +4,6 @@
 *.html
 /ipynb_checkpoints
 /results
+/data
 *.json
 log
