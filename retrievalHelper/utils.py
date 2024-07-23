@@ -56,9 +56,9 @@ def load_kwScore(city, edgeType):
     for IUF
     keywordscore = {rest: {kw: freq}}
     """
-    f = open(f'./data/score/{city}-keywords-TFIUF.json')
+    f = open(f'./data/score/{city}-keywords-TF{edgeType}.json')
     keywordScore = json.load(f)
-    f = open(f'./data/score/{city}-keywords-IRF.json')
+    f = open(f'./data/score/{city}-keywords-frequency.json')
     keywordFrequence = json.load(f)
     return keywordScore, keywordFrequence    
 

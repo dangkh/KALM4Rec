@@ -76,7 +76,6 @@ if args.RetModel == "CBR":
     userFT, userFT_test, rest_feature = KNN.loadFT(args.numKW4FT, rest_Label, args.city)
     label_train, label_test = label_ftColab(train_users, test_users, gt, restGraph.numRest, rest_Label)
 
-
     dim_users, dim_items = 384, 384
     learning_rate = args.lr
     hidden_dim = args.hidden_dim
@@ -89,7 +88,7 @@ if args.RetModel == "CBR":
     print(userFT.shape, userFT_test.shape)
     train_dataset = DataCF(userFT, trainLB)
     test_dataset = DataCF(userFT_test, testLB)
-    model = MatrixFactorization(dim_users, dim_items, hidden_dim).to(device)
+    model = CBR(dim_users, dim_items, hidden_dim).to(device)
 
     train_loader = DataLoader(train_dataset, batch_size=args.batch_size, shuffle=True)
     test_loader = DataLoader(test_dataset, batch_size=args.batch_size, shuffle=False)
@@ -103,7 +102,6 @@ if args.RetModel == "CBR":
     # stop
     optimizer = optim.AdamW(model.parameters(), lr=learning_rate, weight_decay= 1e-4)
     criterion = nn.BCELoss()
-    criterion2 = nn.MSELoss()
     # Training loop
     for epoch in range(num_epochs):
         total_loss = 0.0
@@ -126,7 +124,6 @@ if args.RetModel == "CBR":
         print(f'Epoch [{epoch+1}/{num_epochs}], Loss: {total_loss}')
 
         if (epoch+1) % 10 == 0:
-            
             lResults = evaluateModel(model, test_loader, rest_feature, gt, test_users, args.quantity, rest_Label)
             p, r, f = extractResult(lResults)
             if mean(r) > mean(mr):
@@ -277,6 +274,10 @@ if args.export2LLMs:
         prediction = evaluateModel(model, test_loader, rest_feature, gt, test_users, args.quantity, rest_Label, True)
     json_object = json.dumps(prediction, indent=4)
     with open(f"{args.city}_pred_CBR.json", "w") as outfile:
+        outfile.write(json_object)
+
+    json_object = json.dumps(dictionary, indent=4)
+    with open(f"{args.city}_knn2rest.json", "w") as outfile:
         outfile.write(json_object)
 
 p, r, f = mp, mr, mf 

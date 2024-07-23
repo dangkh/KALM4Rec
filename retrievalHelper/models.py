@@ -7,9 +7,9 @@ import json
 import numpy as np
 
 
-class MatrixFactorization(nn.Module):
+class CBR(nn.Module):
     def __init__(self, dim_users, dim_items, embedding_dim):
-        super(MatrixFactorization, self).__init__()
+        super(CBR, self).__init__()
         self.user_embeddings = nn.Linear(dim_users, embedding_dim)
         self.uAP = AttentionPooling(embedding_dim , embedding_dim // 4)
         self.item_embeddings = nn.Linear(dim_items, embedding_dim)
