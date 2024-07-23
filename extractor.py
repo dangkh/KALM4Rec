@@ -340,7 +340,6 @@ mkdir("./data/keywords/")
 mkdir("./data/score/")
 mkdir("./data/embedding/")
 for tp in typeFile:
-    continue
     if tp == 'train':
         f = open(f'./data/preprocessed/by_city-users_min_3_reviews/keywords_spacy-min_3/{tp}/{city}-keywords.json')
     else:
