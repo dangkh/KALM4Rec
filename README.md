@@ -39,7 +39,7 @@ python .\retrieval.py --RetModel MVAE  --export2LLMs --city edinburgh --num_epoc
 python retrieval.py --RetModel CBR --edgeType IUF 
 
 # MPG
-python retrieval.py --RetModel MGP --edgeType IUF 
+python retrieval.py --RetModel MGP --export2LLMs --city singapore --edgeType IUF
 
 
 ```
