@@ -3,6 +3,7 @@ from ast import parse
 import os
 import time
 from retrievalHelper.utils import *
+from kwExtractorHelper.utils import mkdir
 from retrievalHelper.u4Res import *
 from retrievalHelper.u4KNN import *
 from retrievalHelper.u4train import *
@@ -286,7 +287,8 @@ else:
             trainUwithCandi[listsimU[idx]] = tmp
 
         json_object = json.dumps(trainUwithCandi, indent=4)
-        with open(f"{args.city}_user2candidate.json", "w") as outfile:
+        mkdir("./data/out2LLMs/")
+        with open(f"./data/out2LLMs/{args.city}_user2candidate.json", "w") as outfile:
             outfile.write(json_object)  
     mp, mr, mf = extractResult(lResults)
 
@@ -294,12 +296,12 @@ else:
 if args.export2LLMs:
     if args.RetModel == "CBR":
         prediction = evaluateModel(model, test_loader, rest_feature, gt, test_users, args.quantity, rest_Label, True)
-    json_object = json.dumps(prediction, indent=4)
-    with open(f"{args.city}_pred_CBR.json", "w") as outfile:
-        outfile.write(json_object)
+        json_object = json.dumps(prediction, indent=4)
+        with open(f"./data/out2LLMs/{args.city}_pred_CBR.json", "w") as outfile:
+            outfile.write(json_object)
 
     json_object = json.dumps(dictionary, indent=4)
-    with open(f"{args.city}_knn2rest.json", "w") as outfile:
+    with open(f"./data/out2LLMs/{args.city}_knn2rest.json", "w") as outfile:
         outfile.write(json_object)
 
 p, r, f = mp, mr, mf 

@@ -13,7 +13,7 @@ spacy, DGL,
 ### Stage 1: Keyword extraction and Processing
 ```
 # extract keyword
-python extractor.py
+python .\extractor.py --edgeType IUF --city singapore --kwExtractor kw_NLTK
 
 # Download train: train is filtered file at ./data/preprocessed/by_city-users_min_3_reviews/keywords_spacy-min_3/train) then rename as: {city}-keyword_train.json
 # Download test: train is filtered file at ./data/preprocessed/by_city-users_min_3_reviews/keywords_spacy/test) then rename as: {city}-keyword_test.json
