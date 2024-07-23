@@ -353,6 +353,7 @@ for tp in typeFile:
     inputs = model.encode(kws)
     kwEB_pad = np.asarray(inputs)
     np.save(f'./data/embedding/{city}_kwSenEB_pad_{tp}.npy', kwEB_pad)
+    f.close()
 
 # Download train: train is filtered file at ./data/preprocessed/by_city-users_min_3_reviews/keywords_spacy-min_3/train) then rename as: {city}-keyword_train.json
 # Download test: train is filtered file at ./data/preprocessed/by_city-users_min_3_reviews/keywords_spacy/test) then rename as: {city}-keyword_test.json
