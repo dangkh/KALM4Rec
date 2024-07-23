@@ -252,9 +252,11 @@ else:
     lResults = []
     lidx = [x for x in range(len(test_users))]
     np.random.shuffle(lidx)
+    dictionary = {}
+    listsimU = []
     for ite in tqdm(range(len(test_users))):
         idx = lidx[ite]
-        testUser, topK_Key = procesTest(test_users, test_users2kw, idx, KNN, restGraph)
+        testUser, topK_Key, keyfrequency, topUser = procesTest(test_users, test_users2kw, idx, KNN, restGraph, args.export2LLMs)
         testkey = [kw_data.index(x) for x in topK_Key]
         ft = np.zeros(len(kw_data))
         for x in testkey: ft[x] = 1.0
@@ -266,6 +268,26 @@ else:
         groundtruth = gt[testUser]
         score = quick_eval(result, groundtruth)
         lResults.append(score)
+        if args.export2LLMs:
+            simU = topUser
+            userInteract = {'kw':topK_Key, 'score_kw': keyfrequency, 'candidate':result, 'simUser': simU}
+            listsimU.extend(simU)
+            dictionary[testUser] = userInteract
+    if args.export2LLMs:
+        trainUwithCandi = {}
+        listsimU = list(set(listsimU))
+        for idx in tqdm(range(len(listsimU))):
+            userIdx = train_users.index(listsimU[idx])
+            user_key = train_users2kw[userIdx]
+            topK_Key, keyfrequency = restGraph.retrievalKey(user_key)
+            tmp = {}
+            for key, sc in zip(topK_Key, keyfrequency):
+                tmp[key] = sc
+            trainUwithCandi[listsimU[idx]] = tmp
+
+        json_object = json.dumps(trainUwithCandi, indent=4)
+        with open(f"{args.city}_user2candidate.json", "w") as outfile:
+            outfile.write(json_object)  
     mp, mr, mf = extractResult(lResults)
 
 

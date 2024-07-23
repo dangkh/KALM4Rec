@@ -140,9 +140,9 @@ def procesTest(test_users, test_users2kw, idx, KNN, restGraph, returnTop = False
     topK_Key, keyfrequency = restGraph.retrievalKey(testkey)
     if returnTop:
         topUser = restGraph.key_score2simUser(topK_Key, keyfrequency)
-        return testUser, topK_Key, topUser
+        return testUser, topK_Key, keyfrequency, topUser
 
-    return testUser, topK_Key    
+    return testUser, topK_Key , "", ""   
 
 
 
