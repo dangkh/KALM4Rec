@@ -14,10 +14,18 @@ from nltk.tokenize import word_tokenize
 from nltk.probability import FreqDist
 import string
 from nltk.util import ngrams
+from rake_nltk import Rake
+import yake
 nlp = spacy.load("en_core_web_sm")
 nltk.download('punkt')
 nltk.download('stopwords')
 nltk.download('averaged_perceptron_tagger')
+
+def is_noun_phrase(phrase):
+    words = nltk.word_tokenize(phrase)
+    pos_tags = nltk.pos_tag(words)
+    # Check if all words are either nouns (NN, NNS, NNP, NNPS) or adjectives (JJ)
+    return all(tag.startswith('NN') or tag == 'JJ' for word, tag in pos_tags)
 
 
 class setExtractor(object):
@@ -61,7 +69,28 @@ class setExtractor(object):
 
 		# Count the frequency of each noun phrase
 		noun_phrase_freq = Counter(noun_phrases)
-		return noun_phrase_freq, noun_phrases   
+		return noun_phrase_freq, noun_phrases
+
+	def kw_RAKE(text, keep=None):
+		rake = Rake()
+		rake.extract_keywords_from_text(text)
+
+		ranked_phrases = rake.get_ranked_phrases()
+		noun_phrases = [phrase for phrase in ranked_phrases if is_noun_phrase(phrase)]
+
+		noun_phrase_freq = Counter(noun_phrases)
+		return noun_phrase_freq, noun_phrases
+
+	def kw_YAKE(text, keep=None):
+		yake_extractor = yake.KeywordExtractor()
+
+		keywords = yake_extractor.extract_keywords(text)
+
+		noun_phrases = [phrase for phrase, score in keywords if is_noun_phrase(phrase)]
+
+		# Count the frequency of each noun phrase
+		noun_phrase_freq = Counter(noun_phrases)
+		return noun_phrase_freq, noun_phrases
 
 def mkdir(idir):
 	if not os.path.isdir(idir):
@@ -96,7 +125,7 @@ def save_np_info(np2count, np2reviews, np2rest, np2users, ofile, count_only=Fals
 
 
 def extract_raw_keywords_for_reviews(data, ofile, keep=['ADJ', 'NOUN', 'PROPN', 'VERB'],
-									 overwrite=False, review2keyword_ofile=None, argsExtractor="spacy"):
+									 overwrite=True, review2keyword_ofile=None, argsExtractor="spacy"):
 	if os.path.isfile(ofile) and not overwrite:
 		print("Existing output file. Stop! (set overwrite=True to overwrite)")
 		return
