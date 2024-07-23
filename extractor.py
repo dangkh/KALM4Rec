@@ -274,19 +274,15 @@ if args.edgeType == "IRF":
 
     city2irf = {}
 
-    for setname in os.listdir(idir_root):
-        if setname.startswith("."):
-            continue
-        idir = os.path.join(idir_root, setname)
-        odir = os.path.join(odir_root, setname)
-        mkdir(odir)
-        for fname in os.listdir(idir):
-            if fname.startswith("."):
-                continue
-            ifile = os.path.join(idir, fname)
-            ofile = os.path.join(odir, fname)
-            print("Processing for", ifile)
-            compute_tfirf(ifile, ofile, irf=get_irf(fname, city2irf, irf_dir))
+    setname = "train"
+    idir = os.path.join(idir_root, setname)
+    odir = os.path.join(odir_root, setname)
+    mkdir(odir)
+    fname = f"{city}-keywords.json"
+    ifile = os.path.join(idir, fname)
+    ofile = os.path.join(odir, fname)
+    print("Processing for", ifile)
+    compute_tfirf(ifile, ofile, irf=get_irf(fname, city2irf, irf_dir))
 else:
 
     names = ['train']
@@ -316,19 +312,15 @@ else:
 
     city2iuf = {}
 
-    for setname in os.listdir(idir_root):
-        if setname.startswith("."):
-            continue
-        idir = os.path.join(idir_root, setname)
-        odir = os.path.join(odir_root, setname)
-        mkdir(odir)
-        for fname in os.listdir(idir):
-            if fname.startswith("."):
-                continue
-            ifile = os.path.join(idir, fname)
-            ofile = os.path.join(odir, fname)
-            print("Processing for", ifile)
-            compute_tfiuf(ifile, ofile, irf=get_irf(fname, city2iuf, iuf_dir))
+    setname = "train"
+    idir = os.path.join(idir_root, setname)
+    odir = os.path.join(odir_root, setname)
+    mkdir(odir)
+    fname = f"{city}-keywords.json"
+    ifile = os.path.join(idir, fname)
+    ofile = os.path.join(odir, fname)
+    print("Processing for", ifile)
+    compute_tfiuf(ifile, ofile, irf=get_irf(fname, city2iuf, iuf_dir))
 
 
 model = SentenceTransformer('all-MiniLM-L6-v2')
