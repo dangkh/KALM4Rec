@@ -68,6 +68,11 @@ sourceFile = open(args.logResult, 'a')
 
 print('*'*10, 'Result' ,'*'*10, file = sourceFile)
 prediction = []
+numUser = len(train_users)
+numItem = len(rest_Label)
+label_train, label_test = label_ftColab(train_users, test_users, gt, restGraph.numRest, rest_Label)
+trainLB = np.asarray(label_train)
+testLB = np.asarray(label_test)
 
 if args.RetModel == "CBR":
     print("*"*50)
@@ -75,16 +80,12 @@ if args.RetModel == "CBR":
     print("*"*50)
 
     userFT, userFT_test, rest_feature = KNN.loadFT(args.numKW4FT, rest_Label, args.city)
-    label_train, label_test = label_ftColab(train_users, test_users, gt, restGraph.numRest, rest_Label)
-
     dim_users, dim_items = 384, 384
     learning_rate = args.lr
     hidden_dim = args.hidden_dim
     num_epochs = args.num_epochs
 
-    trainLB = np.asarray(label_train)
-    testLB = np.asarray(label_test)
-
+    
     print("feature shape (train / test):")
     print(userFT.shape, userFT_test.shape)
     train_dataset = DataCF(userFT, trainLB)
@@ -146,23 +147,60 @@ elif args.RetModel == "Jaccard":
         lResults.append(score)
     mp, mr, mf = extractResult(lResults)
 elif args.RetModel == "MVAE":
-    pass
+    learning_rate = 0.003
+    embedding_dim = 128
+    num_epochs = 500
+
+    train_dataset = DataMVAE(trainLB)
+    test_dataset = DataMVAE(trainLB, True)
+
+    train_loader = DataLoader(train_dataset, batch_size=128, shuffle=True)
+    test_loader = DataLoader(test_dataset, batch_size=128, shuffle=False)
+    in_dims = [embedding_dim, len(rest_Label)]
+    model = AutoEncoder(in_dims).to(device)
+    listsimU = []
+    for idx in tqdm(range(len(test_users))):
+        testUser, topK_Key, keyfrequency, topUser = procesTest(test_users, test_users2kw, idx, KNN, restGraph, True)
+        listsimU.append([train_users.index(x) for x in topUser])
+
+    mp, mr, mf = 0, 0, 0
+    print(model)
+    optimizer = optim.AdamW(model.parameters(), lr=learning_rate, weight_decay= 1e-4)
+    for epoch in range(num_epochs):
+        total_loss = 0.0
+        model.train()
+        for batch_idx, data in enumerate(train_loader):
+            
+            data = data.to(device).to(torch.float32)
+            optimizer.zero_grad()
+            # Forward pass
+            batch_recon, mu, logvar = model(data)
+
+            loss = AEloss_function(batch_recon, data, mu, logvar)
+            # Backward pass and optimization step
+            loss.backward()
+            total_loss += loss.item() 
+            optimizer.step()
+
+            # Print training progress
+        print(f'Epoch [{epoch+1}/{num_epochs}], Loss: {total_loss}')
+
+        if (epoch+1) % 10 == 0:
+            lResults = evaluateModel_vae(model, test_loader, test_users, listsimU, gt, train_users, args.quantity, rest_Label, args.city)
+            p, r, f = extractResult(lResults)
+            if mean(r) > mean(mr):
+                mp, mr, mf = p, r, f
+            print(f'Epoch [{epoch+1}/{num_epochs}], prec: {mean(p)}, rec: {mean(r)}, f1: {mean(f)}')
+
 elif args.RetModel == "MF":
     print("*"*50)
     print("running MF-BPR at: ")
     print("*"*50)
 
-    numUser = len(train_users)
-    numItem = len(rest_Label)
-
-    label_train, label_test = label_ftColab(train_users, test_users, gt, restGraph.numRest, rest_Label)
-
     learning_rate = args.lr
     embedding_dim = args.hidden_dim
     num_epochs = args.num_epochs
 
-    trainLB = np.asarray(label_train)
-    testLB = np.asarray(label_test)
     train_dataset = DataBPR(trainLB)
     test_dataset = DataBPR(trainLB, True)
     train_loader = DataLoader(train_dataset, batch_size=128, shuffle=True)
@@ -203,8 +241,6 @@ elif args.RetModel == "MF":
     
     lResults = []
     for idx in tqdm(range(len(test_users))):
-        if idx > 3000:
-            break
         testUser, topK_Key, _, topUser = procesTest(test_users, test_users2kw, idx, KNN, restGraph, True)
         idU = torch.LongTensor([train_users.index(x) for x in topUser]).to(device)
         rest_score = []
@@ -255,7 +291,8 @@ else:
     np.random.shuffle(lidx)
     dictionary = {}
     listsimU = []
-    tmpHelper = regionHelper(l_rest)
+    if args.city=='tripAdvisor':
+        tmpHelper = regionHelper(l_rest)
     for ite in tqdm(range(len(test_users))):
         idx = lidx[ite]
         testUser, topK_Key, keyfrequency, topUser = procesTest(test_users, test_users2kw, idx, KNN, restGraph, args.export2LLMs)
