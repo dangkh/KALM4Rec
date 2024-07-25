@@ -69,7 +69,7 @@ def load_groundTruth(gt_file):
     for uid, rid, r in zip(gt['user_id'], gt['rest_id'], gt['rating']):
         if uid not in u2rs:
             u2rs[uid] = []
-        u2rs[uid].append((rid, r))
+        u2rs[uid].append((str(rid), r))
     return u2rs
 
 def getRestLB(data):
@@ -146,3 +146,26 @@ def procesTest(test_users, test_users2kw, idx, KNN, restGraph, returnTop = False
 
 
 
+class regionHelper(object):
+    """docstring for regionHelper"""
+    def __init__(self, l_rest):
+        super(regionHelper, self).__init__()
+        df2 = pd.read_csv('./data/reviews/hotel.csv')
+        hotel_region_dict = dict(zip(df2['hotelID'], df2['region_id']))
+        rest2city = []
+        for rest in l_rest:
+            rest = int(rest)
+            rest2city.append(hotel_region_dict[rest])
+        self.rest2city = np.asarray(rest2city)
+        with open('./data/reviews/user2region.json', 'r') as f:
+            self.author_region = json.load(f)
+
+
+    def query(self, id):
+        tmp_reg = self.author_region[id]
+        marker = np.zeros(len(self.rest2city))
+        for reg in tmp_reg:
+            tmp = np.where(self.rest2city == reg)[0]
+            marker[tmp] = 1
+        return marker
+        

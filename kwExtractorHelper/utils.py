@@ -125,7 +125,7 @@ def save_np_info(np2count, np2reviews, np2rest, np2users, ofile, count_only=Fals
 
 
 def extract_raw_keywords_for_reviews(data, ofile, keep=['ADJ', 'NOUN', 'PROPN', 'VERB'],
-									 overwrite=True, review2keyword_ofile=None, argsExtractor="spacy"):
+									 overwrite=True, review2keyword_ofile=None, argsExtractor="kw_spacy"):
 	if os.path.isfile(ofile) and not overwrite:
 		print("Existing output file. Stop! (set overwrite=True to overwrite)")
 		return
@@ -137,7 +137,7 @@ def extract_raw_keywords_for_reviews(data, ofile, keep=['ADJ', 'NOUN', 'PROPN', 
 	for rid, uid, restid, text in tqdm(zip(data['review_id'],
 		data['user_id'], data['rest_id'], data['text']), total=len(data)):
 		doc = text
-		if argsExtractor == "spacy":
+		if argsExtractor == "kw_spacy":
 			doc = nlp(text)
 		kwExtractor = getattr(setExtractor, argsExtractor)
 		tmp, keywords = kwExtractor(doc, keep=keep)  # np for this review
@@ -154,6 +154,8 @@ def extract_raw_keywords_for_reviews(data, ofile, keep=['ADJ', 'NOUN', 'PROPN', 
 
 
 def load_split(sfile='./data/reviews/splits.json', city='singapore', setname='test'):
+	if city == "tripAdvisor":
+		sfile = './data/reviews/tripAdvisor_splits.json'
 	return json.load(open(sfile))[city][setname]
 
 

@@ -142,7 +142,7 @@ elif args.RetModel == "Jaccard":
         pred = jcsim.pred(testkey)
         groundtruth = gt[testUser]
         prediction.append(pred)
-        score = quick_eval(pred, groundtruth, sourceFile)
+        score = quick_eval(pred, groundtruth, sourceFile, args.city=='tripAdvisor')
         lResults.append(score)
     mp, mr, mf = extractResult(lResults)
 elif args.RetModel == "MVAE":
@@ -205,7 +205,7 @@ elif args.RetModel == "MF":
     for idx in tqdm(range(len(test_users))):
         if idx > 3000:
             break
-        testUser, topK_Key, topUser = procesTest(test_users, test_users2kw, idx, KNN, restGraph, True)
+        testUser, topK_Key, _, topUser = procesTest(test_users, test_users2kw, idx, KNN, restGraph, True)
         idU = torch.LongTensor([train_users.index(x) for x in topUser]).to(device)
         rest_score = []
         for rest in range(restGraph.numRest):
@@ -216,7 +216,7 @@ elif args.RetModel == "MF":
         restPred = [rest_Label[x] for x in tmp]
 
         groundtruth = gt[testUser]
-        score = quick_eval(restPred, groundtruth)
+        score = quick_eval(restPred, groundtruth, None, args.city=='tripAdvisor')
         lResults.append(score)
     mp, mr, mf = extractResult(lResults)
 
@@ -255,6 +255,7 @@ else:
     np.random.shuffle(lidx)
     dictionary = {}
     listsimU = []
+    tmpHelper = regionHelper(l_rest)
     for ite in tqdm(range(len(test_users))):
         idx = lidx[ite]
         testUser, topK_Key, keyfrequency, topUser = procesTest(test_users, test_users2kw, idx, KNN, restGraph, args.export2LLMs)
@@ -263,11 +264,14 @@ else:
         for x in testkey: ft[x] = 1.0
         ft = ft.reshape(-1, 1)
         tmp = np.matmul(adj, ft).reshape(-1)
+        if args.city=='tripAdvisor':
+            sc = tmpHelper.query(testUser)
+            tmp = tmp*sc
         idxrest = np.argsort(tmp)[::-1]
         result = [l_rest[x] for x in idxrest[:args.quantity]]
         prediction.append(result)
         groundtruth = gt[testUser]
-        score = quick_eval(result, groundtruth)
+        score = quick_eval(result, groundtruth, None, args.city=='tripAdvisor')
         lResults.append(score)
         if args.export2LLMs:
             simU = topUser
