@@ -43,6 +43,24 @@ class DataCF(Dataset):
         return len(self.data)
 
 
+class DataMVAE(Dataset):
+    '''
+    this dataset is for BPR with only embedding
+    '''
+    def __init__(self, label, testSet = False):
+        self.label = torch.from_numpy(label)
+
+    def __getitem__(self, index):
+        '''
+        return data and label
+        '''
+        
+        return self.label[index]
+
+    def __len__(self):
+        return len(self.label)        
+
+
 class DataBPR(Dataset):
     '''
     this dataset is for BPR with only embedding
@@ -121,8 +139,6 @@ def evaluateModel(model, data_loader, rest_train, groundtruth, users, numRetriev
 def evaluate2pred(users, groundtruth, listPred, numRetrieval, rest_Label):
     lResults = []
     for idx in range(len(users)):
-        if idx > 3000:
-            break
         testUser = users[idx]
         groundtruthUser = groundtruth[testUser]
         pred = listPred[idx]
@@ -132,17 +148,15 @@ def evaluate2pred(users, groundtruth, listPred, numRetrieval, rest_Label):
         lResults.append(restPred)
     return lResults
 
-def evaluate(users, groundtruth, listPred, numRetrieval, rest_Label):
+def evaluate(users, groundtruth, listPred, numRetrieval, rest_Label, city = 'singapore'):
     lResults = []
     for idx in range(len(users)):
-        if idx > 3000:
-            break
         testUser = users[idx]
         groundtruthUser = groundtruth[testUser]
         pred = listPred[idx]
         tmp = np.argsort(pred)[::-1][:numRetrieval]
         restPred = [rest_Label[x] for x in tmp]
-        score = quick_eval(restPred, groundtruthUser)
+        score = quick_eval(restPred, groundtruthUser, None, city == 'tripAdvisor' )
         lResults.append(score)    
     return lResults    
 
@@ -162,3 +176,26 @@ def evaluateModel_MFBPR(model, data_loader, rest_train, groundtruth, users, numR
     return evaluate(users, groundtruth, listPred, numRetrieval, rest_Label)
 
 
+def evaluateModel_vae(model, data_loader, test_users, simU, groundtruth, users, numRetrieval, rest_Label, city = 'singapore'):
+    lResults = []
+    model.eval()
+    trainPred = []
+    listPred = []
+    for batch_idx, data in enumerate(data_loader):
+        data = data.to(device).to(torch.float32)
+        predictions, mu, logvar = model(data)
+        predictions = predictions.detach().cpu().numpy()
+        r = [x for x in predictions]
+        trainPred.extend(r)
+    trainPred = np.asarray(trainPred).reshape(len(users),-1)
+    if len(test_users) != len(users):
+        listPred = []
+        for idx in range(len(test_users)):
+            idu = simU[idx]
+            tmp = np.sum(np.asarray([trainPred[x] for x in idu]),0)
+            listPred.append(tmp)
+        listPred = np.asarray(listPred)
+    else:
+        listPred = trainPred
+
+    return evaluate(test_users, groundtruth, listPred, numRetrieval, rest_Label, city)
