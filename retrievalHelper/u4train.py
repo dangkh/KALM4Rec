@@ -9,13 +9,16 @@ GPU = torch.cuda.is_available()
 device = torch.device('cuda' if GPU else "cpu")
 
 
-def quick_eval(preds, gt, source = None):
+def quick_eval(preds, gt, source = None, hotel = False):
     '''
     - preds: [list of restaurants]
     - GT: [('wrdLrTcHXlL4UsiYn3cgKQ', 4.0), ('uG59lRC-9fwt64TCUHnuKA', 3.0)]
     - 
     '''
     gt_list = set([a[0] for a in gt])
+    if hotel:
+        gt_list = set([str(a[0]) for a in gt])
+
     preds_list = list(set(preds))
     ov = gt_list.intersection(preds_list)
     prec = len(ov)/len(preds_list)

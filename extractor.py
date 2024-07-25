@@ -8,13 +8,13 @@ import argparse
 import shutil
 from kwExtractorHelper.utils import *
 
-CITIES_LIST = ['charlotte', 'edinburgh', 'lasvegas', 'london', 'phoenix', 'pittsburgh', 'singapore']
+CITIES_LIST = ['charlotte', 'edinburgh', 'lasvegas', 'london', 'phoenix', 'pittsburgh', 'singapore', 'tripadvisor']
 
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--city', type=str, default='edinburgh', help=f'choose city{CITIES_LIST}')
 parser.add_argument('--edgeType', type=str, default='IUF', help='IUF or IRF')
-parser.add_argument('--kwExtractor', type=str, default='spacy', help='kw_spacy, kw_NLTK, kw_RAKE, kw_YAKE')
+parser.add_argument('--kwExtractor', type=str, default='kw_spacy', help='kw_spacy, kw_NLTK, kw_RAKE, kw_YAKE')
 args = parser.parse_args()
 
 print("args:", args)
@@ -32,7 +32,6 @@ for setname in sets:
     extract_raw_keywords_for_reviews(dt_set, ofile=os.path.join(odir, city + '-keywords.json'), keep=['ADJ', 'NOUN', 'PROPN', 'VERB'],
                                     overwrite=False, review2keyword_ofile=os.path.join(odir,city+"-review2keywords.csv"),
                                     argsExtractor = args.kwExtractor)
-
 
 min_freq = 3
 city = args.city
