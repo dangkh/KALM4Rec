@@ -142,7 +142,7 @@ def fewshot(model,city, type_method,type_llm,  data_user_test, user_kws_train,  
             Input: Please suggest the 15 most suitable restaurants for me from the candidate set that I will visit them, according to the user and candidate restaurant keywords I provided above.
             Output: Must include 15 restaurants in the candidate set. No explanation. Desired format is string: restaurant_1, restaurant_2, ... 
             '''
-    elif type_llm == 'gemini-pro':
+    elif type_llm == 'gemini_pro':
         if type_method == '1_shot':
             temp_fewshot = '''
             Assume you are a restaurant recommendation system. For example: 
@@ -374,9 +374,9 @@ if __name__ == '__main__':
 
 
     args = parser.parse_args()
-    root_dir = 'reRanker'
+    root_dir = 'reRanker/'
 
-    run_list_kws_for_user = [5]
+    run_list_kws_for_user = [3]
     run_list_kws_for_rest = [5]
     list_method = ['zeroshot']
     # print("Starting time: ", time.strftime('%Y-%m-%d %H:%M:%S',time.localtime(time.time())))
@@ -396,8 +396,8 @@ if __name__ == '__main__':
 
     # sample for fewshot
     if '1_shot' in list_method or '2_shots' in list_method or '3_shots'in list_method:
-        samples = read_json(f'data/fewshot_samples/{city}.json')
-        label_samples = read_json(f'data/fewshot_samples/{city}_label.json')
+        samples = read_json(f'data/fewshot_samples/{city}_5.json')
+        label_samples = read_json(f'data/fewshot_samples/{city}_label_5.json')
 
     folder_path = root_dir + 'results'
     if not os.path.exists(folder_path):
