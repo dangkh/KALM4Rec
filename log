@@ -8,3 +8,23 @@ args: Namespace(city='singapore', quantity=20, seed=1001, edgeType='IUF', logRes
 args: Namespace(city='edinburgh', quantity=20, seed=1001, edgeType='IUF', logResult='./log', export2LLMs=True, RetModel='MPG', numKW4FT=20, hidden_dim=32, lr=0.03, num_epochs=500, batch_size=128)
 0.09147982062780272 0.306411259467201 0.12347141371957689
 ********** End **********
+********** Result **********
+********** Result **********
+********** Result **********
+********** Result **********
+********** Result **********
+********** Result **********
+********** Result **********
+********** Result **********
+********** Result **********
+********** Result **********
+********** Result **********
+args: Namespace(city='singapore', quantity=20, seed=1001, edgeType='IUF', logResult='./log', export2LLMs=False, RetModel='MPG', numKW4FT=20, hidden_dim=32, lr=0.03, num_epochs=500, batch_size=128)
+0.12436548223350255 0.39966859296438134 0.16739597559569236
+********** End **********
+********** Result **********
+********** Result **********
+args: Namespace(city='tripAdvisor', quantity=20, seed=1001, edgeType='IUF', logResult='./log', export2LLMs=False, RetModel='MVAE', numKW4FT=20, hidden_dim=32, lr=0.03, num_epochs=500, batch_size=128)
+0.051044277360066836 0.15559849801793948 0.0745408749149718
+********** End **********
+********** Result **********

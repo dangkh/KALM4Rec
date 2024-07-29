@@ -8,18 +8,27 @@ def read_json(file_path):
     return data
 
 ### Map restaurants to ids and obtain the set of restaurants the user has visited
-def prepare_user2rests(gt_file):
+def prepare_user2rests(gt_file, is_tripAdvisor):
     gt = pd.read_csv(gt_file)
     u2rs = {}
     i = 0
     map_rest_id2int = dict()
     for uid, rid, r in zip(gt['user_id'], gt['rest_id'], gt['rating']):
-        if rid not in map_rest_id2int:
-            map_rest_id2int[rid] = i
-            i +=1
-        if uid not in u2rs:
-            u2rs[uid] = []
-        u2rs[uid].append((map_rest_id2int[rid], r))
+        if is_tripAdvisor:
+            rid_str = str(rid)
+            if rid_str not in map_rest_id2int:
+                map_rest_id2int[rid_str] = i
+                i +=1
+            if uid not in u2rs:
+                u2rs[uid] = []
+            u2rs[uid].append((map_rest_id2int[rid_str], r))
+        else:
+            if rid not in map_rest_id2int:
+                map_rest_id2int[rid] = i
+                i +=1
+            if uid not in u2rs:
+                u2rs[uid] = []
+            u2rs[uid].append((map_rest_id2int[rid], r))
     return gt,u2rs,map_rest_id2int
 
 ### retrieve the keywords for candidate restaurant and return them as a string

@@ -19,8 +19,8 @@ import ast
 import re
 import tiktoken
 
-   
-random.seed(1234)
+seed = 12
+random.seed(seed)
 
 sleep_int = 100
 sleep_time = 10
@@ -284,20 +284,40 @@ def extract_numbers(input_string):
             numbers += char
     return numbers
 def zeroshot(model, type_llm, data_user_test,  map_rest_id2int, new_results_res_kw, num_kws_user, num_kws_rest, gpt_prefix='Output:'):
-    temp = '''
+    if city == 'tripAdvisor':
+        # temp = '''
+        # Assume you are a hotel recommendation system.
+        # The keywords I frequently use when selecting hotels are: {}.
+        # The set of candidate hotel for me, listed within square brackets and separated by commas (Format: [hotel_id_1, hotel_id_2, ...]), is: {}.
+        # Keywords associated with the candidate hotels are in the following format: hotel_id_1 (keyword 1, keyword 2, ...) are: {}.
+        # Input: Based on the provided user and candidate hotel keywords, please recommend the 15 most suitable hotels for me from the candidate set that I will visit.
+        # Output: The output must include 15 hotels from the candidate hotel set, formatted as a string: hotel_id_1, hotel_id_2, ...
+        # '''
+        temp = '''
+        There are the keywords that I often mention when wanting to choose hotels: {}.
+        The candidate hotel set for me is enclosed in square brackets, with the hotels separated by commas (Format: [hotel_id_1, hotel_id_2,...]) is: {}
+        Keywords associated with candidate hotels are in the following format: hotel_id_1 (keyword 1, keyword 2,...) are {}.
+        Input: Please suggest the 15 most suitable hotels for me from the candidate set that I will visit them, according to the user and candidate hotel keywords I provided above.
+        Output: Must include 15 hotels in the candidate hotel set. No explanation. Desired format is string: hotel_id_1, hotel_id_2, ... 
+        '''
+    else:
+        temp = '''
         There are the keywords that I often mention when wanting to choose restaurants: {}.
         The candidate restaurant set for me is enclosed in square brackets, with the restaurants separated by commas (Format: [restaurant_id_1, restaurant_id_2,...]) is: {}
         Keywords associated with candidate restaurants have the following form: restaurant_id_1 (keyword 1, keyword 2,...) are {}.
         Input: Please suggest the 15 most suitable restaurants for me from the candidate set that I will visit them, according to the user and candidate restaurant keywords I provided above.
         Output: Must include 15 restaurants in the candidate restaurant set. No explanation. Desired format is string: restaurant_id_1, restaurant_id_2, ... 
         '''
+
     user_rank = dict()
+    # user_shuffle = dict()
     i = 0
     len_rank = None
     folder_path_result_rerank = f'{root_dir}results_rerank/{city}'
     if not os.path.exists(folder_path_result_rerank):
         os.makedirs(folder_path_result_rerank)
-    file_path_ = folder_path_result_rerank+ f"/zeroshot_{num_kws_user}_{num_kws_rest}.json"
+    file_path_ = folder_path_result_rerank+ f"/zeroshot_{num_kws_user}_{num_kws_rest}_{seed}.json"
+    # file_shuffle = folder_path_result_rerank+ f"/shuffle_cadidate_zeroshot_{num_kws_user}_{num_kws_rest}_{seed}.json"
     if os.path.isfile(file_path_):
         print("File exists")
         with open(file_path_, "r") as file:
@@ -305,33 +325,43 @@ def zeroshot(model, type_llm, data_user_test,  map_rest_id2int, new_results_res_
         len_rank = len(user_rank.keys())
     for uid in tqdm(data_user_test.keys(), total=len(data_user_test)):
         i = i+1
-        if i %250 == 0:
+        if i %1000 == 0:
             time.sleep(120)
         if len_rank is not None:
             if i <= len_rank:
                 continue
         user_kw = data_user_test[uid]['kw'][:num_kws_user] 
-        res_candidate = list(map(int,[str(map_rest_id2int[cand]) for cand in data_user_test[uid]['candidate']]))
-
+        res_candidate = list(map(int,[str(map_rest_id2int[cand]) for cand in data_user_test[uid]['candidate']])) 
+        # random.shuffle(res_candidate)
+        # user_shuffle[uid] = res_candidate
         input = temp.format(', '.join(user_kw),res_candidate, cand_kw_fn(uid, new_results_res_kw, data_user_test, map_rest_id2int, 20, num_kws_rest))
-
         flag = False
         while flag is False:
             try:
                 predictions = prompt(model, type_llm, input)
+                # print(predictions)
                 flag = True
                 i= i+1
+                pred_ = predictions.split(',')
+                pred = []
+                for aa in pred_:
+                    pred.append(extract_numbers(aa))
             except httpx.ReadTimeout:
                 print("Timeout occurred. Connection timed out.")
-                time.sleep(60)        
+                time.sleep(120)    
+            except RuntimeError as e:
+                print(f"{e}")
+                time.sleep(120) 
 
-        pred_ = predictions.split(',')
-        pred = []
-        for aa in pred_:
-            pred.append(extract_numbers(aa))
+        # pred_ = predictions.split(',')
+        # pred = []
+        # for aa in pred_:
+        #     pred.append(extract_numbers(aa))
         user_rank[uid] = list(map(int, pred))
         with open(file_path_, "w") as json_file:
             json.dump(user_rank, json_file)
+        # with open(file_shuffle, "w") as json_file:
+        #     json.dump(user_shuffle, json_file)
 
     return user_rank
 
@@ -368,7 +398,7 @@ if __name__ == '__main__':
     parser.add_argument('--type_method', type=str, default= 'zeroshot', help='zeroshot,1_shot, 2_shots, 3_shots')
     parser.add_argument('--num_kws_user', type=int, default= 3)
     parser.add_argument('--num_kws_rest', type=int, default= 5)
-    parser.add_argument('--city', type=str, default='singapore', help=f'choose city{listcity}')
+    parser.add_argument('--city', type=str, default='tripAdvisor', help=f'choose city{listcity}')
     parser.add_argument('--type_LLM', type=str, default='gemini_pro', help='gemini_pro, chatGPT,...')
     parser.add_argument('--api_key', type=str, default=None, help='API key')
 
@@ -376,20 +406,24 @@ if __name__ == '__main__':
     args = parser.parse_args()
     root_dir = 'reRanker/'
 
-    run_list_kws_for_user = [3]
-    run_list_kws_for_rest = [5]
+    run_list_kws_for_user = [5]
+    run_list_kws_for_rest = [10]
     list_method = ['zeroshot']
     # print("Starting time: ", time.strftime('%Y-%m-%d %H:%M:%S',time.localtime(time.time())))
     ### Load data
     city = args.city
     data_user_test_ = read_json(f"data/{args.city}/{args.city}_knn2rest.json")
-    rest_kws = read_json(f"data/{args.city}/{args.city}-keywords-TFIUF.json")
+    rest_kws = read_json(f"data/score/{args.city}-keywords-TFIUF.json")
     user_kws_train_ = read_json(f'data/{args.city}/{args.city}_user2candidate.json') #user-train
 
 
     ## review filesS
+    if city == 'tripAdvisor':
+        is_tripAdvisor = True
+    else: 
+        is_tripAdvisor= False
     gt_file = 'data/reviews/{}.csv'.format(args.city)
-    gt, u2rs, map_rest_id2int_ = prepare_user2rests(gt_file)
+    gt, u2rs, map_rest_id2int_ = prepare_user2rests(gt_file, is_tripAdvisor = is_tripAdvisor)
 
 
     new_results_res_kw_ = get_kw_for_rest(rest_kws, map_rest_id2int_)
@@ -404,8 +438,8 @@ if __name__ == '__main__':
         # If it doesn't exist, create it
         os.makedirs(folder_path)
         print(f"Folder '{folder_path}' created successfully.")
-    file_path = f'{folder_path}/{args.city}.txt'
-    file_path_json = f'{folder_path}/{args.city}.json'
+    file_path = f'{folder_path}/{args.city}_{seed}.txt'
+    file_path_json = f'{folder_path}/{args.city}_{seed}.json'
 
     print('baseline')
     result_str = ''
