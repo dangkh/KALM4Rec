@@ -3,15 +3,15 @@ import pandas as pd
 import os
 
 # Open the JSON file for reading
-with open('data/reviews/splits.json', 'r') as file:
+with open('./data/reviews/tripAdvisor_splits.json', 'r') as file:
     # Load the JSON data from the file
     data = json.load(file)
 
-city = 'london'
+city = 'tripAdvisor'
 
 user_train = data[city]['train']
 
-rv_ = pd.read_csv(f'/home/ubuntu/duc.nm195858/KALM4Rec/data/reviews/{city}.csv')
+rv_ = pd.read_csv(f'./data/reviews/{city}.csv')
 
 total_res = set(rv_['rest_id'].unique().tolist())
 
@@ -33,21 +33,23 @@ for uid in user_train:
         label_res = hist_res[:5] + random_fill
         new_res_candi = hist_res[:5] + random_fill
         count_10 +=1
+    new_res_candi = [str(x) for x in new_res_candi]
+    label_res = [str(x) for x in label_res]
     random.shuffle(new_res_candi)
     uid_train_rest[uid] =  new_res_candi
     label_[uid] = label_res
 print(count_10)
-folder_path = 'data/fewshot_samples'
+folder_path = './data/fewshot_samples'
 if not os.path.exists(folder_path):
         # If it doesn't exist, create it
         os.makedirs(folder_path)
 
-file_path = f'data/fewshot_samples/{city}_5.json'
+file_path = f'./data/fewshot_samples/{city}_5.json'
 with open(file_path, 'w') as file:
     # Save the dictionary as JSON
     json.dump(uid_train_rest, file)
 
-file_path = f'data/fewshot_samples/{city}_label_5.json'
+file_path = f'./data/fewshot_samples/{city}_label_5.json'
 with open(file_path, 'w') as file:
     # Save the dictionary as JSON
     json.dump(label_, file)
