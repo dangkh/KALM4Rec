@@ -137,7 +137,7 @@ def evaluateModel(model, data_loader, rest_train, groundtruth, users, numRetriev
     return evaluate(users, groundtruth, listPred, numRetrieval, rest_Label)
 
 def evaluate2pred(users, groundtruth, listPred, numRetrieval, rest_Label):
-    lResults = []
+    lResults = {}
     for idx in range(len(users)):
         testUser = users[idx]
         groundtruthUser = groundtruth[testUser]
@@ -145,7 +145,7 @@ def evaluate2pred(users, groundtruth, listPred, numRetrieval, rest_Label):
         tmp = np.argsort(pred)[::-1][:numRetrieval]
         restPred = [rest_Label[x] for x in tmp]
         # score = quick_eval(restPred, groundtruthUser)
-        lResults.append(restPred)
+        lResults[str(testUser)] = restPred
     return lResults
 
 def evaluate(users, groundtruth, listPred, numRetrieval, rest_Label, city = 'singapore'):
