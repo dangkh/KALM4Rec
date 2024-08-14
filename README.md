@@ -67,5 +67,5 @@ python retrieval.py --RetModel MGP --export2LLMs --city singapore --edgeType IUF
 ## Dataset:
 ```
 Yelp, Tripadvisor
-Link: TBD
+Link: https://www.cs.cmu.edu/~jiweil/html/hotel-review.html
 ```
