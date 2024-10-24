@@ -28,3 +28,31 @@ args: Namespace(city='tripAdvisor', quantity=20, seed=1001, edgeType='IUF', logR
 0.051044277360066836 0.15559849801793948 0.0745408749149718
 ********** End **********
 ********** Result **********
+********** Result **********
+args: Namespace(city='tripAdvisor', quantity=20, seed=1001, edgeType='IUF', logResult='./log', export2LLMs=True, RetModel='MGP', numKW4FT=20, hidden_dim=32, lr=0.03, num_epochs=500, batch_size=128)
+0.1454469507101086 0.43740875726691253 0.21192468330791248
+********** End **********
+********** Result **********
+args: Namespace(city='tripAdvisor', quantity=20, seed=1001, edgeType='IUF', logResult='./log', export2LLMs=True, RetModel='MGP', numKW4FT=20, hidden_dim=32, lr=0.03, num_epochs=500, batch_size=128)
+0.13180868838763576 0.39489700002492506 0.19182999295526143
+********** End **********
+********** Result **********
+args: Namespace(city='tripAdvisor', quantity=20, seed=1001, edgeType='IUF', logResult='./log', export2LLMs=True, RetModel='MGP', numKW4FT=20, hidden_dim=32, lr=0.03, num_epochs=500, batch_size=128)
+0.1454469507101086 0.43740875726691253 0.21192468330791248
+********** End **********
+********** Result **********
+args: Namespace(city='singapore', quantity=20, seed=1001, edgeType='IUF', logResult='./log', export2LLMs=True, RetModel='MGP', numKW4FT=20, hidden_dim=32, lr=0.03, num_epochs=500, batch_size=128)
+0.08121827411167512 0.2756720701220324 0.11226624934501939
+********** End **********
+********** Result **********
+args: Namespace(city='london', quantity=20, seed=1001, edgeType='IUF', logResult='./log', export2LLMs=True, RetModel='MGP', numKW4FT=20, hidden_dim=32, lr=0.03, num_epochs=500, batch_size=128)
+0.092969696969697 0.32190287986017085 0.12812925826975446
+********** End **********
+********** Result **********
+args: Namespace(city='edinburgh', quantity=20, seed=1001, edgeType='IUF', logResult='./log', export2LLMs=True, RetModel='MGP', numKW4FT=20, hidden_dim=32, lr=0.03, num_epochs=500, batch_size=128)
+0.09147982062780272 0.30877092486138474 0.12362907400977863
+********** End **********
+********** Result **********
+args: Namespace(city='tripAdvisor', quantity=20, seed=1001, edgeType='IUF', logResult='./log', export2LLMs=True, RetModel='MGP', numKW4FT=20, hidden_dim=32, lr=0.03, num_epochs=500, batch_size=128)
+0.14164578111946535 0.4316486697483415 0.2073530673411795
+********** End **********
