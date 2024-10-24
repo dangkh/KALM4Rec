@@ -21,6 +21,7 @@ python .\extractor.py --edgeType IUF --city singapore --kwExtractor kw_NLTK
 
 # Download irf and tf_irf;  rename as {city}-keyword-IRF.json {city}-keyword-TFIRF.json ; move to  ./data/score/{city}-keyword-TFIRF.json
 # Download iuf and tf_iuf;  rename as {city}-keyword-IUF.json {city}-keyword-TFIUF.json ; move to  ./data/score/{city}-keyword-TFIUF.json
+# remember to delete all files 
 ```
 
 ### Stage 2: Generate candidates: jaccard, MPG, BCR, MF, MVAE.

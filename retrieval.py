@@ -317,7 +317,8 @@ else:
             dictionary[testUser] = userInteract
     if args.export2LLMs:
         trainUwithCandi = {}
-        listsimU = list(set(listsimU))
+        listsimU = list(set(train_users))
+        # listsimU = list(set(listsimU))
         for idx in tqdm(range(len(listsimU))):
             userIdx = train_users.index(listsimU[idx])
             user_key = train_users2kw[userIdx]

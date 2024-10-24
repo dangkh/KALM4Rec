@@ -111,3 +111,23 @@ def cand_rv_fn(uid_, data, map_rest_id2int, topCandidates = 20, res_rv_ = None):
                 cand_rv[map_rest_id2int[cand]] = res_rv_[cand]
     result_string = ', '.join(f'{key} ({value})' for key, value in cand_rv.items())
     return result_string
+
+
+def ndcgEval(preds, gt):
+    '''
+    - preds: [list of restaurants]
+    - GT: [('wrdLrTcHXlL4UsiYn3cgKQ', 4.0), ('uG59lRC-9fwt64TCUHnuKA', 3.0)]
+    - 
+    '''
+    gt_list = set([a[0] for a in gt])
+    preds_list = list(set(preds))
+    ov = gt_list.intersection(preds_list)
+    truth_relevant = np.asarray([[0]*len(preds)])
+    if len(preds) == 1:
+        return len(ov)/len(preds_list)
+    for candidate in ov:
+        idx = preds_list.index(candidate)
+        truth_relevant[0,idx] = 1
+
+    score = np.asarray([[x+1 for x in range(len(preds))][::-1]])
+    return ndcg_score(truth_relevant, score)
