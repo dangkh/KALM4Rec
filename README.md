@@ -24,7 +24,7 @@ python .\extractor.py --edgeType IUF --city singapore --kwExtractor kw_NLTK
 # remember to delete all files 
 ```
 
-### Stage 2: Generate candidates: jaccard, MPG, BCR, MF, MVAE.
+### Stage 2: Generate candidates: jaccard, MPG, MF, MVAE.
 
 ```
 # jaccard
@@ -35,9 +35,6 @@ python .\retrieval.py --RetModel MF  --export2LLMs --city edinburgh --num_epochs
 
 # MVAE
 python .\retrieval.py --RetModel MVAE  --export2LLMs --city edinburgh --num_epochs 500 --hidden_dim 128 --lr 0.003
-
-# CBR
-python retrieval.py --RetModel CBR --edgeType IUF 
 
 # MPG
 python retrieval.py --RetModel MGP --export2LLMs --city singapore --edgeType IUF
