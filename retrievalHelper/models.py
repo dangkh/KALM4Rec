@@ -107,38 +107,6 @@ def AEloss_function(recon_x, x, mu, logvar, anneal=0.2):
 
     return BCE + anneal * KLD
 
-class CBR(nn.Module):
-    def __init__(self, dim_users, dim_items, embedding_dim):
-        super(CBR, self).__init__()
-        self.user_embeddings = nn.Linear(dim_users, embedding_dim)
-        self.uAP = AttentionPooling(embedding_dim , embedding_dim // 4)
-        self.item_embeddings = nn.Linear(dim_items, embedding_dim)
-        self.iAP = AttentionPooling(embedding_dim , embedding_dim // 4)
-        self.dropout = nn.Dropout(0.2)
-        self.activate = nn.Sigmoid()
-        # initial weight
-        self.apply(xavier_normal_initialization)
-
-    def forward(self, user_ft, item_ft):
-        numBatch = len(user_ft)
-        numRest = len(item_ft)
-        user_embeddings = self.user_embeddings(user_ft)
-        # user_embeddings = self.r1(user_embeddings)
-        user_embeddings = self.dropout(user_embeddings)
-        user_embeddings, _ = self.uAP(user_embeddings)
-        item_embeddings = self.item_embeddings(item_ft)
-        item_embeddings = self.dropout(item_embeddings)
-        # item_embeddings = self.r2(item_embeddings)
-        item_embeddings, _ = self.iAP(item_embeddings)
-        item_embeddings = torch.permute(item_embeddings, (1, 0))
-        pred = self.activate(torch.matmul(user_embeddings, item_embeddings))
-        # using this to return 
-        return pred   
-
-
-    def prediction(self, user_ft, item_ft):
-        return self.forward(user_ft, item_ft)
-
 class AttentionPooling(nn.Module):
     def __init__(self, input_size, hidden_size):
         super(AttentionPooling, self).__init__()
