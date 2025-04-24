@@ -57,7 +57,6 @@ python retrieval.py --RetModel MGP --export2LLMs --city singapore --edgeType IUF
 | jaccard     | 0.03        |   0.06        |
 | MF          | 0.05        |   0.13        |
 | MVAE        | 0.08        |   0.28        |
-| CBR         | 0.15        |   0.42        |
 | MPG         | 0.15        |   0.42        |
 
 ### Stage 3: Recommend by LLMs
