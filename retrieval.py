@@ -74,64 +74,7 @@ label_train, label_test = label_ftColab(train_users, test_users, gt, restGraph.n
 trainLB = np.asarray(label_train)
 testLB = np.asarray(label_test)
 
-if args.RetModel == "CBR":
-    print("*"*50)
-    print("Using CBR")
-    print("*"*50)
-
-    userFT, userFT_test, rest_feature = KNN.loadFT(args.numKW4FT, rest_Label, args.city)
-    dim_users, dim_items = 384, 384
-    learning_rate = args.lr
-    hidden_dim = args.hidden_dim
-    num_epochs = args.num_epochs
-
-    
-    print("feature shape (train / test):")
-    print(userFT.shape, userFT_test.shape)
-    train_dataset = DataCF(userFT, trainLB)
-    test_dataset = DataCF(userFT_test, testLB)
-    model = CBR(dim_users, dim_items, hidden_dim).to(device)
-
-    train_loader = DataLoader(train_dataset, batch_size=args.batch_size, shuffle=True)
-    test_loader = DataLoader(test_dataset, batch_size=args.batch_size, shuffle=False)
-    rest_feature = torch.from_numpy(rest_feature).type(torch.FloatTensor)
-    rest_feature = rest_feature.to(device)
-
-    # Model, optimizer, and loss function
-
-    mp, mr, mf = 0, 0, 0
-    print(model)
-    # stop
-    optimizer = optim.AdamW(model.parameters(), lr=learning_rate, weight_decay= 1e-4)
-    criterion = nn.BCELoss()
-    # Training loop
-    for epoch in range(num_epochs):
-        total_loss = 0.0
-        model.train()
-        for batch_idx, batchDat in enumerate(train_loader):
-            optimizer.zero_grad()
-            data, label = batchDat
-            userDat = data.to(device)
-            label = label.to(device)
-            restDat = rest_feature
-            prediction = model(userDat, restDat)
-            loss = criterion(prediction , label)
-
-            # Backward pass and optimization step
-            loss.backward()
-            total_loss += loss.item() 
-            optimizer.step()
-
-            # Print training progress
-        print(f'Epoch [{epoch+1}/{num_epochs}], Loss: {total_loss}')
-
-        if (epoch+1) % 10 == 0:
-            lResults = evaluateModel(model, test_loader, rest_feature, gt, test_users, args.quantity, rest_Label)
-            p, r, f = extractResult(lResults)
-            if mean(r) > mean(mr):
-                mp, mr, mf = p, r, f
-            print(f'Epoch [{epoch+1}/{num_epochs}], prec: {mean(p)}, rec: {mean(r)}, f1: {mean(f)}')
-elif args.RetModel == "Jaccard":
+if args.RetModel == "Jaccard":
     print("*"*50)
     print("using Jaccard")
     print("*"*50)
