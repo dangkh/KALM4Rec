@@ -32,11 +32,11 @@ parser.add_argument('--export2LLMs', action='store_true', help='whether export l
 '''
 Model args
 '''
-parser.add_argument('--RetModel', type=str, default='MPG', help='Jaccard, MF, MVAE, CBR, MPG_old, MPG')
+parser.add_argument('--RetModel', type=str, default='MPG', help='Jaccard, MF, MVAE, CLCp, MPG_old, MPG')
 parser.add_argument('--numKW4FT', type=int, default=20, help='number of keyword for feature')
 
 '''
-CBR args
+CLCp args
 '''
 parser.add_argument('--hidden_dim', type=int, default=32, help='hidden_dim')
 parser.add_argument('--lr', type=float, default=0.03, help='learning_rate')
