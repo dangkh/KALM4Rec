@@ -279,10 +279,10 @@ else:
 
 
 if args.export2LLMs:
-    if args.RetModel == "CBR":
+    if args.RetModel == "CLCp":
         prediction = evaluateModel(model, test_loader, rest_feature, gt, test_users, args.quantity, rest_Label, True)
         json_object = json.dumps(prediction, indent=4)
-        with open(f"./data/out2LLMs/{args.city}_pred_CBR.json", "w") as outfile:
+        with open(f"./data/out2LLMs/{args.city}_pred_CLCp.json", "w") as outfile:
             outfile.write(json_object)
 
     json_object = json.dumps(dictionary, indent=4)
